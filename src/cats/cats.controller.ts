@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Header, HttpCode, Param, ParseIntPipe, Post, Req, Scope, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Header, HttpCode, Param, ParseIntPipe, Post, Req, Scope, UseGuards } from '@nestjs/common';
 import { Request } from 'express';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -28,7 +28,6 @@ export class CatsController {
 
   @Post()
   @Header('Cache-Control', 'none')
-  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   create(@Req() request: Request, @Body() createCatDto: CreateCatDto): Observable<CatResponse> {
     console.log(createCatDto.toString());
 
