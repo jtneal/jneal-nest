@@ -3,7 +3,7 @@ let listen: number;
 jest.mock('@nestjs/core', () => ({
   NestFactory: {
     create: jest.fn(() => ({
-      use: jest.fn(() => {}),
+      use: jest.fn(() => null),
       listen: jest.fn((port: number) => {
         listen = port;
       }),

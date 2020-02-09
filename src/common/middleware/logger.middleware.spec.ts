@@ -10,8 +10,8 @@ describe('LoggerMiddleware', () => {
   });
 
   it('should log incoming requests', () => {
-    const spy = jest.spyOn(console, 'log').mockImplementation(() => {});
-    logger({ method: 'POST', url: '/cats' } as Request, {} as Response, () => {});
+    const spy = jest.spyOn(console, 'log').mockImplementation(() => null);
+    logger({ method: 'POST', url: '/cats' } as Request, {} as Response, () => null);
     expect(spy).toHaveBeenCalledWith('Incoming Request: POST /cats');
   });
 });

@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Delete, Get, Header, HttpCode, Param, Post, Req, Scope } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Header, HttpCode, Param, Post, Req, Scope, ValidationPipe, UsePipes, ParseIntPipe } from '@nestjs/common';
 import { Request } from 'express';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -23,10 +23,9 @@ export class CatsController {
 
   @Post()
   @Header('Cache-Control', 'none')
+  @UsePipes(new ValidationPipe({ transform: true }))
   create(@Req() request: Request, @Body() createCatDto: CreateCatDto): Observable<CatResponse> {
-    if (!createCatDto.name) {
-      throw new BadRequestException('Name is required');
-    }
+    console.log(createCatDto.toString());
 
     return this.catsService.create(createCatDto).pipe(
       map(this.getCatResponse(request))
@@ -34,16 +33,16 @@ export class CatsController {
   }
 
   @Get(':id')
-  findOne(@Req() request: Request, @Param('id') id: string): Observable<CatResponse> {
-    return this.catsService.findOne(this.getCatId(id)).pipe(
+  findOne(@Req() request: Request, @Param('id', new ParseIntPipe()) id: number): Observable<CatResponse> {
+    return this.catsService.findOne(id).pipe(
       map(this.getCatResponse(request)),
     );
   }
 
   @Delete(':id')
   @HttpCode(204)
-  delete(@Param('id') id: string) {
-    this.catsService.delete(this.getCatId(id));
+  delete(@Param('id', new ParseIntPipe()) id: number) {
+    this.catsService.delete(id);
   }
 
   private getCatsResponse(request: Request): (cats: Cat[]) => CatsResponse {
@@ -52,16 +51,6 @@ export class CatsController {
 
   private getCatResponse(request: Request): (cat: Cat) => CatResponse {
     return (cat: Cat) => ({ cat, _links: this.getHateosLinks(request) });
-  }
-
-  private getCatId(id: string): number {
-    const catId = parseInt(id);
-
-    if (isNaN(catId)) {
-      throw new BadRequestException('Cat ID must be a number')
-    }
-
-    return catId;
   }
 
   private getHateosLinks(request: Request): HateosLinks {

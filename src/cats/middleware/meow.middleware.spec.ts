@@ -14,8 +14,8 @@ describe('MeowMiddleware', () => {
   });
 
   it('should log meow', () => {
-    const spy = jest.spyOn(console, 'log').mockImplementation(() => {});
-    middleware.use({ method: 'GET', url: '/cats' } as Request, {} as Response, () => {});
+    const spy = jest.spyOn(console, 'log').mockImplementation(() => null);
+    middleware.use({ method: 'GET', url: '/cats' } as Request, {} as Response, () => null);
     expect(spy).toHaveBeenCalledWith('Meow!');
   });
 });
