@@ -30,9 +30,11 @@ describe('Cats Controller', () => {
 
   describe('findAll', () => {
     it('should return all cats', async () => {
+      const spy = jest.spyOn(console, 'log').mockImplementation(() => null);
       jest.spyOn(service, 'findAll').mockImplementation(() => of(catsMock));
-      const response = await controller.findAll({ method: 'GET', url: '/cats' } as Request).toPromise();
+      const response = await controller.findAll({ method: 'GET', url: '/cats' } as Request, { firstName: 'Jason', lastName: 'Neal' }).toPromise();
       expect(response.cats).toBe(catsMock);
+      expect(spy).toHaveBeenCalledWith('Jason', 'Neal')
     });
   });
 
@@ -52,9 +54,11 @@ describe('Cats Controller', () => {
 
   describe('findOne', () => {
     it('should return a cat', async () => {
+      const spy = jest.spyOn(console, 'log').mockImplementation(() => null);
       jest.spyOn(service, 'findOne').mockImplementation(() => of(catMock));
-      const response = await controller.findOne({ method: 'GET', url: '/cats/1' } as Request, 1).toPromise();
+      const response = await controller.findOne({ method: 'GET', url: '/cats/1' } as Request, 1, 'Jason').toPromise();
       expect(response.cat).toBe(catMock);
+      expect(spy).toHaveBeenCalledWith('Jason')
     });
   });
 

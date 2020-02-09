@@ -1,8 +1,11 @@
-import { Body, Controller, Delete, Get, Header, HttpCode, Param, Post, Req, Scope, ValidationPipe, UsePipes, ParseIntPipe } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Header, HttpCode, Param, ParseIntPipe, Post, Req, Scope, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { Request } from 'express';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
+import { User } from '../common/decorators/user.decorator';
+import { AuthGuard } from '../common/guards/auth.guard';
+import { User as UserEntity } from '../common/interfaces/user.interface';
 import { CatsService } from './cats.service';
 import { CreateCatDto } from './dto/create-cat.dto';
 import { Cat } from './interfaces/cat.interface';
@@ -11,11 +14,13 @@ import { Cat } from './interfaces/cat.interface';
   path: 'cats',
   scope: Scope.REQUEST,
 })
+@UseGuards(AuthGuard)
 export class CatsController {
   constructor(private readonly catsService: CatsService) {}
 
   @Get()
-  findAll(@Req() request: Request): Observable<CatsResponse> {
+  findAll(@Req() request: Request, @User() user: UserEntity): Observable<CatsResponse> {
+    console.log(user.firstName, user.lastName);
     return this.catsService.findAll().pipe(
       map(this.getCatsResponse(request)),
     );
@@ -33,7 +38,8 @@ export class CatsController {
   }
 
   @Get(':id')
-  findOne(@Req() request: Request, @Param('id', new ParseIntPipe()) id: number): Observable<CatResponse> {
+  findOne(@Req() request: Request, @Param('id', new ParseIntPipe()) id: number,  @User('firstName') firstName: string): Observable<CatResponse> {
+    console.log(firstName);
     return this.catsService.findOne(id).pipe(
       map(this.getCatResponse(request)),
     );
