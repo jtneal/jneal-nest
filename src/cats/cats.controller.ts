@@ -1,66 +1,67 @@
-import { BadRequestException, Body, Controller, Delete, Get, Header, HttpCode, Post, Req, Param, Scope } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Header, HttpCode, Param, Post, Req, Scope } from '@nestjs/common';
 import { Request } from 'express';
-import { Observable, of } from 'rxjs';
+import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+
+import { CatsService } from './cats.service';
+import { CreateCatDto } from './dto/create-cat.dto';
+import { Cat } from './interfaces/cat.interface';
 
 @Controller({
   path: 'cats',
   scope: Scope.REQUEST,
 })
 export class CatsController {
-  cats = [
-    "Persian",
-    "Maine Coon",
-    "Exotic",
-    "Siamese",
-    "Abyssinian",
-    "Ragdoll",
-    "Birman",
-    "American Shorthair",
-    "Oriental",
-    "Sphynx",
-  ];
+  constructor(private readonly catsService: CatsService) {}
 
   @Get()
   findAll(@Req() request: Request): Observable<CatsResponse> {
-    return of<CatsResponse>({
-      cats: this.cats,
-      _links: this.getHateosLinks(request),
-    });
+    return this.catsService.findAll().pipe(
+      map(this.getCatsResponse(request)),
+    );
   }
 
   @Post()
   @Header('Cache-Control', 'none')
-  create(@Req() request: Request, @Body('name') name: string): Observable<CatsResponse> {
-    if (!name) {
+  create(@Req() request: Request, @Body() createCatDto: CreateCatDto): Observable<CatResponse> {
+    if (!createCatDto.name) {
       throw new BadRequestException('Name is required');
     }
 
-    const response = this.findAll(request).pipe(
-      map((response) => {
-        response.cats.push(name);
-
-        return response;
-      })
+    return this.catsService.create(createCatDto).pipe(
+      map(this.getCatResponse(request))
     );
-
-    response.pipe();
-
-    return response;
   }
 
   @Get(':id')
-  findOne(@Req() request: Request, @Param('id') id: string): CatResponse {
-    return {
-      cat: this.cats[parseInt(id) - 1],
-      _links: this.getHateosLinks(request),
-    }
+  findOne(@Req() request: Request, @Param('id') id: string): Observable<CatResponse> {
+    return this.catsService.findOne(this.getCatId(id)).pipe(
+      map(this.getCatResponse(request)),
+    );
   }
 
   @Delete(':id')
   @HttpCode(204)
   delete(@Param('id') id: string) {
-    console.log(`Delete ${this.cats[parseInt(id) - 1]}`);
+    this.catsService.delete(this.getCatId(id));
+  }
+
+  private getCatsResponse(request: Request): (cats: Cat[]) => CatsResponse {
+    return (cats: Cat[]) => ({ cats, _links: this.getHateosLinks(request) });
+  }
+
+  private getCatResponse(request: Request): (cat: Cat) => CatResponse {
+    return (cat: Cat) => ({ cat, _links: this.getHateosLinks(request) });
+  }
+
+  private getCatId(id: string): number {
+    const catId = parseInt(id);
+
+    if (isNaN(catId)) {
+      throw new BadRequestException('Cat ID must be a number')
+    }
+
+    return catId;
   }
 
   private getHateosLinks(request: Request): HateosLinks {
@@ -74,12 +75,12 @@ export class CatsController {
 }
 
 interface CatResponse {
-  cat: string;
+  cat: Cat;
   _links: HateosLinks;
 }
 
 interface CatsResponse {
-  cats: string[];
+  cats: Cat[];
   _links: HateosLinks;
 }
 
