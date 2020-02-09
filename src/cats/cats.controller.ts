@@ -28,7 +28,7 @@ export class CatsController {
 
   @Post()
   @Header('Cache-Control', 'none')
-  @UsePipes(new ValidationPipe({ transform: true }))
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   create(@Req() request: Request, @Body() createCatDto: CreateCatDto): Observable<CatResponse> {
     console.log(createCatDto.toString());
 
