@@ -22,6 +22,8 @@ describe('Cats Controller', () => {
     service = await module.resolve<CatsService>(CatsService);
   });
 
+  afterEach(() => jest.restoreAllMocks());
+
   it('should be defined', () => {
     expect(controller).toBeDefined();
   });

@@ -11,7 +11,7 @@ describe('AppModule', () => {
       imports: [AppModule],
     }).compile();
 
-    controller = module.get<AppController>(AppController);
+    controller = await module.resolve<AppController>(AppController);
   });
 
   it('should be defined', () => {

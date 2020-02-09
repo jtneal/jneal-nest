@@ -25,4 +25,10 @@ nest g class cats/dto/create-cat.dto
 # Added tests that don't auto generate: app.module.spec.ts and main.spec.ts
 
 # Updated @types/jest, jest, and ts-jest to latest versions
+
+nest g module cats
+# Updated cats/cats.module.ts
+
+nest g middleware common/middleware/logger
+nest g middleware cats/middleware/meow
 ```
