@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Header, HttpCode, Param, ParseIntPipe, Post, Req, Scope, UseGuards } from '@nestjs/common';
+import { Body, ClassSerializerInterceptor, Controller, Delete, Get, Header, HttpCode, Param, ParseIntPipe, Post, Req, Scope, UseGuards, SerializeOptions, UseInterceptors } from '@nestjs/common';
 import { Request } from 'express';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -9,6 +9,7 @@ import { User as UserEntity } from '../common/interfaces/user.interface';
 import { CatsService } from './cats.service';
 import { CreateCatDto } from './dto/create-cat.dto';
 import { Cat } from './interfaces/cat.interface';
+import { GitUserEntity } from './interfaces/git-user.interface';
 
 @Controller({
   path: 'cats',
@@ -48,6 +49,19 @@ export class CatsController {
   @HttpCode(204)
   delete(@Param('id', new ParseIntPipe()) id: number) {
     this.catsService.delete(id);
+  }
+
+  @UseInterceptors(ClassSerializerInterceptor)
+  @SerializeOptions({
+    excludeExtraneousValues: true,
+  })
+  @Get(':id/user')
+  getUser(): Observable<GitUserEntity> {
+    return this.catsService.getUser().pipe(
+      map((gitUser) => new GitUserEntity(gitUser)),
+      // Could also just do this and remove UseInterceptors and SerializeOptions
+      // map((gitUser) => plainToClass(GitUserEntity, gitUser, { excludeExtraneousValues: true})),
+    );
   }
 
   private getCatsResponse(request: Request): (cats: Cat[]) => CatsResponse {

@@ -1,4 +1,4 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { HttpModule, MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 
 import { CatsController } from './cats.controller';
 import { CatsService } from './cats.service';
@@ -6,6 +6,7 @@ import { MeowMiddleware } from './middleware/meow.middleware';
 
 @Module({
   controllers: [CatsController],
+  imports: [HttpModule],
   providers: [CatsService],
 })
 export class CatsModule implements NestModule {

@@ -1,12 +1,14 @@
+import { HttpModule } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Request } from 'express';
 import { of } from 'rxjs';
 
 import { CatsController } from './cats.controller';
 import { CatsService } from './cats.service';
+import { CreateCatDto } from './dto/create-cat.dto';
+import { GitUserEntity } from './interfaces/git-user.interface';
 import { catMock } from './mocks/cat.mock';
 import { catsMock } from './mocks/cats.mock';
-import { CreateCatDto } from './dto/create-cat.dto';
 
 describe('Cats Controller', () => {
   let controller: CatsController;
@@ -15,6 +17,7 @@ describe('Cats Controller', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [CatsController],
+      imports: [HttpModule],
       providers: [CatsService],
     }).compile();
 
@@ -68,6 +71,16 @@ describe('Cats Controller', () => {
       const response = controller.delete(1);
 
       expect(response).toBe(undefined);
+    });
+  });
+
+  describe('getUser', () => {
+    it('should get user', async () => {
+      const mock = { login: 'test' } as GitUserEntity;
+      jest.spyOn(service, 'getUser').mockImplementation(() => of(mock));
+      const response = await controller.getUser().toPromise();
+
+      expect(response).toEqual(mock);
     });
   });
 });
